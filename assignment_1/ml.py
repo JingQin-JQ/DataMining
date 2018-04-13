@@ -25,6 +25,8 @@ class ML:
 		#NA to be filled with mean of sum
 		'''still subject to change'''
 		grouped.fillna(grouped.mean(), inplace=True)
+		
+		return grouped
 
     def prediction(self, df):
         pass
