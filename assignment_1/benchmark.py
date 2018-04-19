@@ -7,22 +7,21 @@ class Benchmark:
         pass
 
     def preprocess(self, df):
-        df.loc[df['variable'] == "mood"]
-        df['time'] = df['time'].astype(str).str[:-4]
-        df['time'] = pd.to_datetime(df['time'], errors='coerce')
-        df['just_date'] = df['time'].dt.date
-        df_mood = df.loc[df['variable'] == "mood"]
-        df_preprocess = df_mood.groupby(['id', 'just_date'])['value'].mean().to_frame(name = 'mood_mean').reset_index()
-        df_preprocess['label'] = df_preprocess['mood_mean']
-        return df_preprocess
+        df['label'] = df['mood']
+        df = df[~pd.isnull(df['label'])]
+        return df
 
     def prediction(self, df):
-        df['pred'] = df['mood_mean'].shift(1)
+        X_test = df.drop(['id', 'date', 'label'], axis=1)
+        y_test = df['label']
+        df['pred'] = y_test.shift(1)
         return df
 
     def pipeline(self, df):
         df_preprocess = self.preprocess(df)
-        df_pred= self.prediction(df_preprocess)
+        df_train = df_preprocess.groupby('id').apply(util.get_trainset).reset_index().drop('level_1', axis=1)
+        df_test= df_preprocess.groupby('id').apply(util.get_testset).reset_index().drop('level_1', axis=1)
+        df_pred= self.prediction(df_test)
         eval_scores = util.evaluate(df_pred)
         return df_pred, eval_scores
 

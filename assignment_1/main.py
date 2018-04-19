@@ -6,6 +6,7 @@ from benchmark import Benchmark
 from ml import ML
 from temporal_algorithm import Temporal
 import util
+import warnings
 
 
 def get_args():
@@ -17,7 +18,7 @@ def get_args():
         epilog='The code was...'
     )
     parser.add_argument('-m', '--prediction_models', dest='prediction_models',required=True,
-                        help='Prediction_models: ML, Temporal_algorithm or benchmark',
+                        help='Prediction_models: ml, Temporal_algorithm or benchmark',
                         default="benchmark")
     parser.add_argument('-o', '--pred_file', dest='pred_file', required=True,
                         metavar='FILE', default='pred_file',
@@ -28,7 +29,7 @@ def get_args():
     
     args = parser.parse_args()
 
-    if args.prediction_models not in ['ML', 'Temporal_algorithm','benchmark']:
+    if args.prediction_models not in ['ml', 'Temporal_algorithm','benchmark']:
         sys.exit('Unknown models ' + args.prediction_models)
     return args
 
@@ -38,7 +39,7 @@ def main():
     Main function.
 
     """
-
+    warnings.filterwarnings("ignore")
     # get data from csv file, and catch error reading file
     try:
         df = pd.read_csv('data/dataset_mood_smartphone.csv',sep=",")
@@ -48,10 +49,11 @@ def main():
     # get command line options
     args = get_args()
 
+    df = util.init_data(df)
 
     # initial model
-    if args.prediction_models == "ML":
-        model = Ml()
+    if args.prediction_models == "ml":
+        model = ML()
     elif args.prediction_models == "Temporal_algorithm":
         model = Temporal()
     elif args.prediction_models == "benchmark":
@@ -64,7 +66,7 @@ def main():
 
     # print output
     util.output_to_file(predictions, args.pred_file)
-    util.output_to_file(evaluation_scores, args.eval_file)
+    # util.output_to_file(evaluation_scores, args.eval_file)
     util.output_to_screen(evaluation_scores)
 
 
